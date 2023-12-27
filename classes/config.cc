@@ -125,7 +125,7 @@ int Config::networkPort(void)
 bool Config::reinitialise(void)
 	{
 	if (_parser.isSet(*_reInit))
-		return _parser.value(*_reInit).toInt() != 0;
+		return 1;
 
 	QSettings s;
 	s.beginGroup(SYSTEM_GROUP);
