@@ -7,6 +7,8 @@
 #include "dmbgr.h"
 #include "socket.h"
 
+#define CONNECT		QObject::connect
+
 int main(int argc, char *argv[])
 	{
 	QCoreApplication a(argc, argv);
@@ -40,6 +42,11 @@ int main(int argc, char *argv[])
 	\**************************************************************************/
 	DbMgr db;
 
+	/**************************************************************************\
+	|* Connect up the query/response for the system-info
+	\**************************************************************************/
+	CONNECT(&ws, &Socket::fetchSystemInfo, &db, &DbMgr::fetchSystemInfo);
+	CONNECT(&db, &DbMgr::fetchedSystemInfo, &ws, &Socket::sendSystemInfo);
 
 	return a.exec();
 	}

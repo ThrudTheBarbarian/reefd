@@ -20,7 +20,6 @@ Q_LOGGING_CATEGORY(log_db, "reefd:db")
 #define LOG qDebug(log_db) << QTime::currentTime().toString("hh:mm:ss.zzz")
 #define ERR qCritical(log_db) << QTime::currentTime().toString("hh:mm:ss.zzz")
 
-
 /******************************************************************************\
 |* Constructor
 \******************************************************************************/
@@ -155,28 +154,48 @@ void DbMgr::fetchSystemInfo(QString user, QString identifier)
 	QSqlDatabase db = QSqlDatabase::database();
 
 	/**************************************************************************\
-	|* Perform the query to return all the folder names. Only deals with
-	|* top-level folders right now
+	|* Add the list of known inputs to the results
 	\**************************************************************************/
 	QSqlQuery query;
 	query.exec("SELECT id, name, module, driver "
-				"FROM inputs "
+			   "FROM inputs "
 			   "ORDER BY name");
 
-	QJsonArray list;
-	QJsonObject record;
+	QJsonObject records;
+	QJsonArray inputs;
+	QJsonObject input;
 	while (query.next())
 		{
-		record.insert("id", QJsonValue::fromVariant(query.value(0)));
-		record.insert("name", QJsonValue::fromVariant(query.value(1)));
-		record.insert("module", QJsonValue::fromVariant(query.value(2)));
-		record.insert("driver", QJsonValue::fromVariant(query.value(3)));
-		list.push_back(record);
+		input.insert("id", QJsonValue::fromVariant(query.value(0)));
+		input.insert("name", QJsonValue::fromVariant(query.value(1)));
+		input.insert("module", QJsonValue::fromVariant(query.value(2)));
+		input.insert("driver", QJsonValue::fromVariant(query.value(3)));
+		inputs.push_back(input);
 		}
+	records.insert("inputs", inputs);
+
+	/**************************************************************************\
+	|* Add the list of known outputs to the results
+	\**************************************************************************/
+	query.exec("SELECT id, name, module, driver "
+			   "FROM outputs "
+			   "ORDER BY name");
+
+	QJsonArray outputs;
+	QJsonObject output;
+	while (query.next())
+		{
+		output.insert("id", QJsonValue::fromVariant(query.value(0)));
+		output.insert("name", QJsonValue::fromVariant(query.value(1)));
+		output.insert("module", QJsonValue::fromVariant(query.value(2)));
+		output.insert("driver", QJsonValue::fromVariant(query.value(3)));
+		outputs.push_back(output);
+		}
+	records.insert("outputs", outputs);
 
 	/**************************************************************************\
 	|* Create the JSON record and send to the client who called us
 	\**************************************************************************/
-	QJsonDocument result(list);
+	QJsonDocument result(records);
 	emit fetchedSystemInfo(result.toJson(), identifier);
 	}

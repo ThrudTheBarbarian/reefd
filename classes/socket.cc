@@ -6,7 +6,7 @@
 /******************************************************************************\
 |* Messages
 \******************************************************************************/
-#define MSG_GROUPINFO		"GroupInfo:"
+#define MSG_SYSINFO		"SysInfo"
 
 /******************************************************************************\
 |* Categorised logging support
@@ -90,8 +90,8 @@ void Socket::processTextMessage(const QString& msg)
 	{
 	QWebSocket *client = qobject_cast<QWebSocket *>(sender());
 
-	if (msg.startsWith(MSG_GROUPINFO))
-		emit fetchSystemInfo(msg.mid(10).trimmed(), getIdentifier(client));
+	if (msg.startsWith(MSG_SYSINFO))
+		emit fetchSystemInfo(msg.mid(8).trimmed(), getIdentifier(client));
 	}
 
 /******************************************************************************\
