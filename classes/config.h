@@ -30,6 +30,11 @@ class Config : public Singleton<Config>
 	|* Return the port to run the server-socket on
 	\**********************************************************************/
 	int cacheSize(void);
+
+	/**********************************************************************\
+	|* Set if we want a clean start, deletes everything
+	\**********************************************************************/
+	bool reinitialise(void);
 	};
 
 #endif // CONFIG_H

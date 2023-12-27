@@ -19,6 +19,8 @@
 #define SYSTEM_GROUP			"system"
 #define SYSTEM_DATA_DIR_KEY		"data-dir"
 #define SYSTEM_DATA_DIR_DFLT	"/Volumes/raid/reefd"
+#define SYSTEM_INIT_KEY			"re-initialise"
+#define SYSTEM_INIT_DFLT		"0"
 
 
 #define NETWORK_GROUP			"network"
@@ -33,6 +35,11 @@
 Q_GLOBAL_STATIC_WITH_ARGS(const QCommandLineOption,
 						  _help,
 						  ({"h", "help"}, "Show this useful (?) help"))
+
+Q_GLOBAL_STATIC_WITH_ARGS(const QCommandLineOption,
+						  _reInit,
+						  ({"i", "initialise"},
+						   "Initialise everything at boot. Dangerous."))
 
 
 Q_GLOBAL_STATIC_WITH_ARGS(const QCommandLineOption,
@@ -60,6 +67,7 @@ Config::Config()
 	_parser.setApplicationDescription("Mail daemon");
 	_parser.addOption(*_dataDir);
 	_parser.addOption(*_help);
+	_parser.addOption(*_reInit);
 	_parser.addOption(*_networkPort);
 	_parser.addOption(*_version);
 
@@ -109,5 +117,20 @@ int Config::networkPort(void)
 	QString port = DECODE(s, NETWORK_PORT_KEY, NETWORK_PORT_DFLT);
 	s.endGroup();
 	return port.toInt();
+	}
+
+/******************************************************************************\
+|* Determine if we should reset to factory defaults
+\******************************************************************************/
+bool Config::reinitialise(void)
+	{
+	if (_parser.isSet(*_reInit))
+		return _parser.value(*_reInit).toInt() != 0;
+
+	QSettings s;
+	s.beginGroup(SYSTEM_GROUP);
+	QString init = DECODE(s, SYSTEM_INIT_KEY, SYSTEM_INIT_DFLT);
+	s.endGroup();
+	return init.toInt() != 0;
 	}
 

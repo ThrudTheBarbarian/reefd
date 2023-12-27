@@ -1,3 +1,4 @@
+#include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -26,10 +27,22 @@ Q_LOGGING_CATEGORY(log_db, "reefd:db")
 DbMgr::DbMgr(QObject *parent)
 	  :QObject{parent}
 	{
+	QString dbFile = Config::instance().databaseDir() + "/reef.db";
+
+	/**************************************************************************\
+	|* If we're told to re-initialise then just delete any old database
+	\**************************************************************************/
+	if (Config::instance().reinitialise())
+		{
+		QFile f(dbFile);
+		if (f.exists())
+			if (!f.remove())
+				ERR << "Cannot remove database file " << dbFile;
+		}
+
 	/**************************************************************************\
 	|* Set up the database for later use
 	\**************************************************************************/
-	QString dbFile		= Config::instance().databaseDir() + "/reef.db";
 	QSqlDatabase db	= QSqlDatabase::addDatabase("QSQLITE");
 	db.setDatabaseName(dbFile);
 	_dbOk = db.open();
