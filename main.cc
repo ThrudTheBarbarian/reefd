@@ -4,6 +4,7 @@
 
 #include "config.h"
 #include "constants.h"
+#include "desktop.h"
 #include "dmbgr.h"
 #include "socket.h"
 
@@ -43,10 +44,21 @@ int main(int argc, char *argv[])
 	DbMgr db;
 
 	/**************************************************************************\
+	|* Create a desktop context to handle user requests around the desktop
+	\**************************************************************************/
+	Desktop dt;
+
+	/**************************************************************************\
 	|* Connect up the query/response for the system-info
 	\**************************************************************************/
 	CONNECT(&ws, &Socket::fetchSystemInfo, &db, &DbMgr::fetchSystemInfo);
 	CONNECT(&db, &DbMgr::fetchedSystemInfo, &ws, &Socket::sendSystemInfo);
+
+	/**************************************************************************\
+	|* .. and for desktop icons
+	\**************************************************************************/
+	CONNECT(&ws, &Socket::fetchDesktopIcons, &dt, &Desktop::fetchDesktopIcons);
+	CONNECT(&dt, &Desktop::fetchedDesktopIcons, &ws, &Socket::sendDesktopIcons);
 
 	return a.exec();
 	}

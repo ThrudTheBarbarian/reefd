@@ -22,6 +22,11 @@ class Config : public Singleton<Config>
 	QString databaseDir(void);
 
 	/**********************************************************************\
+	|* Return the directory of the webserver root
+	\**********************************************************************/
+	QString webDir(void);
+
+	/**********************************************************************\
 	|* Return the port to run the server-socket on
 	\**********************************************************************/
 	int networkPort(void);

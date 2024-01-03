@@ -19,6 +19,8 @@
 #define SYSTEM_GROUP			"system"
 #define SYSTEM_DATA_DIR_KEY		"data-dir"
 #define SYSTEM_DATA_DIR_DFLT	"/Volumes/raid/reefd"
+#define SYSTEM_WEB_DIR_KEY		"web-dir"
+#define SYSTEM_WEB_DIR_DFLT		"/Users/simon/src/cappuccino/peak/app"
 #define SYSTEM_INIT_KEY			"re-initialise"
 #define SYSTEM_INIT_DFLT		"0"
 
@@ -49,6 +51,12 @@ Q_GLOBAL_STATIC_WITH_ARGS(const QCommandLineOption,
 						   SYSTEM_DATA_DIR_DFLT))
 
 Q_GLOBAL_STATIC_WITH_ARGS(const QCommandLineOption,
+						  _webDir,
+						  ({"w", SYSTEM_WEB_DIR_KEY},
+						   "Directory for webserver files",
+						   SYSTEM_WEB_DIR_DFLT))
+
+Q_GLOBAL_STATIC_WITH_ARGS(const QCommandLineOption,
 						  _networkPort,
 						  ({"p", NETWORK_PORT_KEY},
 						   "Network socket port number",
@@ -70,6 +78,7 @@ Config::Config()
 	_parser.addOption(*_reInit);
 	_parser.addOption(*_networkPort);
 	_parser.addOption(*_version);
+	_parser.addOption(*_webDir);
 
 
 	/**************************************************************************\
@@ -100,6 +109,20 @@ QString Config::databaseDir(void)
 	QSettings s;
 	s.beginGroup(SYSTEM_GROUP);
 	QString dir = DECODE(s, SYSTEM_DATA_DIR_KEY, SYSTEM_DATA_DIR_DFLT);
+	s.endGroup();
+	return dir;
+	}
+/******************************************************************************\
+|* Get the webserver root dir
+\******************************************************************************/
+QString Config::webDir(void)
+	{
+	if (_parser.isSet(*_webDir))
+		return _parser.value(*_webDir);
+
+	QSettings s;
+	s.beginGroup(SYSTEM_GROUP);
+	QString dir = DECODE(s, SYSTEM_WEB_DIR_KEY, SYSTEM_WEB_DIR_DFLT);
 	s.endGroup();
 	return dir;
 	}

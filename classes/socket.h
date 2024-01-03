@@ -19,64 +19,74 @@ class Socket : public QObject
 	\**************************************************************************/
 
 	public:
-	/**********************************************************************\
-	|* Typedefs and enums
-	\**********************************************************************/
+		/**********************************************************************\
+		|* Typedefs and enums
+		\**********************************************************************/
 
 	private:
-	/**********************************************************************\
-	|* Private variables
-	\**********************************************************************/
-	QWebSocketServer *			_server;		// Handle the connection
-	QMap<QString,QWebSocket *>	_clients;		// Map of connected clients
-	QMutex						_lock;			// Thread safety
+		/**********************************************************************\
+		|* Private variables
+		\**********************************************************************/
+		QWebSocketServer *			_server;		// Handle the connection
+		QMap<QString,QWebSocket *>	_clients;		// Map of connected clients
+		QMutex						_lock;			// Thread safety
 
 
 	private slots:
-	/**********************************************************************\
-	|* Private slots - generally for WebSocket operation
-	\**********************************************************************/
-	void onNewConnection(void);
-	void socketDisconnected();
-	void processTextMessage(const QString &message);
-	void processBinaryMessage(QByteArray message);
+		/**********************************************************************\
+		|* Private slots - generally for WebSocket operation
+		\**********************************************************************/
+		void onNewConnection(void);
+		void socketDisconnected();
+		void processTextMessage(const QString &message);
+		void processBinaryMessage(QByteArray message);
 
 
 	public:
-	/**********************************************************************\
-	|* Constructor / Destructor
-	\**********************************************************************/
-	explicit Socket(QObject *parent = nullptr);
-	~Socket() override;
+		/**********************************************************************\
+		|* Constructor / Destructor
+		\**********************************************************************/
+		explicit Socket(QObject *parent = nullptr);
+		~Socket() override;
 
-	/**********************************************************************\
-	|* Initialise the server
-	\**********************************************************************/
-	void init(int port);
+		/**********************************************************************\
+		|* Initialise the server
+		\**********************************************************************/
+		void init(int port);
 
-	/**********************************************************************\
-	|* Send appropriate message types
-	\**********************************************************************/
-	void sendText(const QString &message, QString identifier = "");
-	void sendData(const QByteArray &data, QString identifier = "");
+		/**********************************************************************\
+		|* Send appropriate message types
+		\**********************************************************************/
+		void sendText(const QString &message, QString identifier = "");
+		void sendData(const QByteArray &data, QString identifier = "");
 
 	signals:
+		/**********************************************************************\
+		|* We got a disconnection
+		\**********************************************************************/
+		void disconnection(QString identifier);
 
-	/**********************************************************************\
-	|* Call out to the database to fetch the current setup, as a given user
-	\**********************************************************************/
-	void fetchSystemInfo(QString user, QString identifier);
+		/**********************************************************************\
+		|* Call out to the database to fetch the current setup, as a given user
+		\**********************************************************************/
+		void fetchSystemInfo(QString user, QString identifier);
 
-	/**********************************************************************\
-	|* We got a disconnection
-	\**********************************************************************/
-	void disconnection(QString identifier);
+		/**********************************************************************\
+		|* Request a list of desktop icons
+		\**********************************************************************/
+		void fetchDesktopIcons(QString user, QString identifier);
+
 
 	public slots:
-	/**********************************************************************\
-	|* Send the group info back to the caller
-	\**********************************************************************/
-	void sendSystemInfo(QString json, QString identifier);
+		/**********************************************************************\
+		|* Send the group info back to the caller
+		\**********************************************************************/
+		void sendSystemInfo(QString json, QString identifier);
+
+		/**********************************************************************\
+		|* Send the icon info back to the caller
+		\**********************************************************************/
+		void sendDesktopIcons(QString json, QString identifier);
 	};
 
 #endif // SOCKET_H

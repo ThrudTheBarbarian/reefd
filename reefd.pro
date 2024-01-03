@@ -9,6 +9,7 @@ CONFIG += c++17 cmdline sdk_no_version_check
 
 SOURCES += \
         classes/config.cc \
+        classes/desktop.cc \
         classes/dmbgr.cc \
         classes/socket.cc \
         main.cc
@@ -24,6 +25,7 @@ INCLUDEPATH += \
 
 HEADERS += \
 	classes/config.h \
+	classes/desktop.h \
 	classes/dmbgr.h \
 	classes/socket.h \
 	include/constants.h \

@@ -6,7 +6,8 @@
 /******************************************************************************\
 |* Messages
 \******************************************************************************/
-#define MSG_SYSINFO		"SysInfo"
+#define MSG_SYSINFO				"SysInfo"
+#define MSG_DESKTOP_ICONS		"DesktopIcons"
 
 /******************************************************************************\
 |* Categorised logging support
@@ -92,6 +93,9 @@ void Socket::processTextMessage(const QString& msg)
 
 	if (msg.startsWith(MSG_SYSINFO))
 		emit fetchSystemInfo(msg.mid(8).trimmed(), getIdentifier(client));
+
+	else if (msg.startsWith(MSG_DESKTOP_ICONS))
+		emit fetchDesktopIcons(msg.mid(12).trimmed(), getIdentifier(client));
 	}
 
 /******************************************************************************\
@@ -158,9 +162,17 @@ void Socket::sendData(const QByteArray &data, QString identifier)
 
 
 /******************************************************************************\
-|* Slot: Send a group-info message to a specific client
+|* Slot: Send a system-info message to a specific client
 \******************************************************************************/
 void Socket::sendSystemInfo(QString json, QString identifier)
+	{
+	sendText(json, identifier);
+	}
+
+/******************************************************************************\
+|* Slot: Send a desktop-icons message to a specific client
+\******************************************************************************/
+void Socket::sendDesktopIcons(QString json, QString identifier)
 	{
 	sendText(json, identifier);
 	}
