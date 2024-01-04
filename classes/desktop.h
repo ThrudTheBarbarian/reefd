@@ -13,6 +13,7 @@ class Desktop : public QObject
 	|* Properties
 	\**************************************************************************/
 	GET(QString, rsrcDir);				// Location of resources
+	GET(QString, fmwkDir);				// Location of frameworks
 
 	public:
 		/**********************************************************************\
@@ -25,6 +26,7 @@ class Desktop : public QObject
 		|* Tell the world we have the JSON ready
 		\**********************************************************************/
 		void fetchedDesktopIcons(QString json, QString identifier);
+		void fetchedDesktopApps(QString json, QString identifier);
 
 	public slots:
 		/**********************************************************************\
@@ -32,6 +34,10 @@ class Desktop : public QObject
 		\**********************************************************************/
 		void fetchDesktopIcons(QString user, QString identifier);
 
+		/**********************************************************************\
+		|* Accept a request to find the apps for a user
+		\**********************************************************************/
+		void fetchDesktopApps(QString user, QString identifier);
 	};
 
 #endif // DESKTOP_H

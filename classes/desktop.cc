@@ -24,6 +24,7 @@ Desktop::Desktop(QObject *parent)
 		:QObject{parent}
 	{
 	_rsrcDir = Config::instance().webDir() + "/Resources/";
+	_fmwkDir = Config::instance().webDir() + "/Frameworks/";
 	}
 
 
@@ -52,7 +53,7 @@ void Desktop::fetchDesktopIcons(QString user, QString identifier)
 			QJsonObject icon;
 			icon.insert("name", parts.at(0));
 			icon.insert("path", QString("/") + ICONS_PATH + iconName);
-			icon.insert("driver", parts.at(0) + "IconDriver");
+			icon.insert("notify", parts.at(0) + "Icon");
 			icons.append(icon);
 			}
 		}
@@ -65,4 +66,36 @@ void Desktop::fetchDesktopIcons(QString user, QString identifier)
 
 	QJsonDocument result(records);
 	emit fetchedDesktopIcons(result.toJson(), identifier);
+	}
+
+/******************************************************************************\
+|* Slot: Get a list of all the app frameworks available to the desktop
+\******************************************************************************/
+void Desktop::fetchDesktopApps(QString user, QString identifier)
+	{
+	(void)user;
+
+	QStringList filters;
+	filters << "*.app" ;
+	QDir dir(_fmwkDir);
+	QStringList appsList = dir.entryList(filters);
+
+	QJsonObject records;
+	QJsonArray apps;
+	for (QString& appName : appsList)
+		{
+		QJsonObject app;
+		app.insert("name", appName);
+		app.insert("notify", appName + "App");
+		apps.append(app);
+		}
+
+	/**************************************************************************\
+	|* Create the JSON record and send to the client who called us
+	\**************************************************************************/
+	records.insert("apps", apps);
+	records.insert("method", "DesktopApps");
+
+	QJsonDocument result(records);
+	emit fetchedDesktopApps(result.toJson(), identifier);
 	}

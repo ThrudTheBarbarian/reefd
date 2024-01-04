@@ -76,6 +76,11 @@ class Socket : public QObject
 		\**********************************************************************/
 		void fetchDesktopIcons(QString user, QString identifier);
 
+		/**********************************************************************\
+		|* Request a list of desktop apps
+		\**********************************************************************/
+		void fetchDesktopApps(QString user, QString identifier);
+
 
 	public slots:
 		/**********************************************************************\
@@ -87,6 +92,11 @@ class Socket : public QObject
 		|* Send the icon info back to the caller
 		\**********************************************************************/
 		void sendDesktopIcons(QString json, QString identifier);
+
+		/**********************************************************************\
+		|* Send the app info back to the caller
+		\**********************************************************************/
+		void sendDesktopApps(QString json, QString identifier);
 	};
 
 #endif // SOCKET_H

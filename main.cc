@@ -55,10 +55,13 @@ int main(int argc, char *argv[])
 	CONNECT(&db, &DbMgr::fetchedSystemInfo, &ws, &Socket::sendSystemInfo);
 
 	/**************************************************************************\
-	|* .. and for desktop icons
+	|* .. and for the desktop
 	\**************************************************************************/
 	CONNECT(&ws, &Socket::fetchDesktopIcons, &dt, &Desktop::fetchDesktopIcons);
 	CONNECT(&dt, &Desktop::fetchedDesktopIcons, &ws, &Socket::sendDesktopIcons);
+
+	CONNECT(&ws, &Socket::fetchDesktopApps, &dt, &Desktop::fetchDesktopApps);
+	CONNECT(&dt, &Desktop::fetchedDesktopApps, &ws, &Socket::sendDesktopApps);
 
 	return a.exec();
 	}
