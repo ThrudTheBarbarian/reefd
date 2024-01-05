@@ -108,39 +108,6 @@ Display::Display(i2c_inst *inst, uint16_t i2cAddr, Size size)
 
 
 /******************************************************************************\
-|* Set a pixel on the framebuffer
-\******************************************************************************/
-void Display::setPixel(int16_t x, int16_t y, WriteMode mode)
-	{
-	if ((x >= 0) && (x < _width) && (y >= 0) && (y < _height)) 
-		{
-        // byte to be used for buffer operation
-        uint8_t byte;
-
-        if (_size == Size::W128xH32) 
-        	{
-            y = (y << 1) + 1;
-            byte = 1 << (y & 7);
-            char byte_offset = byte >> 1;
-            byte = byte | byte_offset;
-        	} 
-        else 
-            byte = 1 << (y & 7);
-        
-
-        // check the write mode and manipulate the frame buffer
-        if (mode == WriteMode::ADD) 
-            _byteOR(x + (y / 8) * _width, byte);
-        else if (mode == WriteMode::SUBTRACT) 
-            _byteAND(x + (y / 8) * _width, ~byte);
-        else if (mode == WriteMode::INVERT) 
-            _byteXOR(x + (y / 8) * _width, byte);
-    	}
-	}
-
-
-
-/******************************************************************************\
 |* Update the framebuffer
 \******************************************************************************/
 void Display::update(void)
@@ -189,24 +156,234 @@ void Display::flip(bool orientation)
 		_cmd(SSD1306_COM_REMAP_ON);
 		}
 	}
+
+/******************************************************************************\
+|* Set a pixel on the framebuffer
+\******************************************************************************/
+void Display::plot(int16_t x, int16_t y, WriteMode mode)
+	{
+	if ((x >= 0) && (x < _width) && (y >= 0) && (y < _height)) 
+		{
+        // byte to be used for buffer operation
+        uint8_t byte;
+
+        if (_size == Size::W128xH32) 
+        	{
+            y = (y << 1) + 1;
+            byte = 1 << (y & 7);
+            char byte_offset = byte >> 1;
+            byte = byte | byte_offset;
+        	} 
+        else 
+            byte = 1 << (y & 7);
+        
+
+        // check the write mode and manipulate the frame buffer
+        if (mode == WriteMode::ADD) 
+            _byteOR(x + (y / 8) * _width, byte);
+        else if (mode == WriteMode::SUBTRACT) 
+            _byteAND(x + (y / 8) * _width, ~byte);
+        else if (mode == WriteMode::INVERT) 
+            _byteXOR(x + (y / 8) * _width, byte);
+    	}
+	}
+
+
 	
 /******************************************************************************\
-|* Draw a bitmap image to the display
+|* Draw a bitmap image to the framebuffer
 \******************************************************************************/
-void Display::draw(int16_t ax, int16_t ay, uint8_t w, uint8_t h, 
+void Display::blit(uint8_t ax, uint8_t ay, uint8_t w, uint8_t h, 
                    uint8_t *image, WriteMode mode)
 	{
-	// goes over every single bit in image and sets pixel data on its coordinates
 	for (uint8_t y = 0; y < h; y++) 
         for (uint8_t x = 0; x < w / 8; x++) 
         	{
             uint8_t byte = image[y * (w / 8) + x];
             for (uint8_t z = 0; z < 8; z++) 
                 if ((byte >> (7 - z)) & 1) 
-                	setPixel(x * 8 + z + ax, y + ay, mode);
+                	plot(x * 8 + z + ax, y + ay, mode);
             }
         
 	}
+
+/******************************************************************************\
+|* Draw a line to the framebuffer
+\******************************************************************************/
+void Display::line(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,
+                   WriteMode mode) 
+    {
+    int x, y, xe, ye, i;
+   
+   	int dx = x1 - x0;
+    int dy = y1 - y0;
+    int dx0 = (dx < 0) ? -dx : dx;
+    int dy0 = (dy < 0) ? -dy : dy;
+    int px = 2 * dy0 - dx0;
+    int py = 2 * dx0 - dy0;
+    
+    if (dy0 <= dx0) 
+    	{
+        if (dx >= 0) 
+        	{
+            x = x0;
+            y = y0;
+            xe = x1;
+        	} 
+        else 
+        	{
+            x = x1;
+            y = y1;
+            xe = x0;
+        	}
+        plot(x, y, mode);
+        
+        for (i = 0; x < xe; i++) 
+        	{
+            x = x + 1;
+            if (px < 0) 
+                px = px + 2 * dy0;
+            else 
+            	{
+                if ((dx < 0 && dy < 0) || (dx > 0 && dy > 0)) 
+                    y = y + 1;
+                else 
+                    y = y - 1;
+                
+                px = px + 2 * (dy0 - dx0);
+            	}
+            plot(x, y, mode);
+        	}
+    	} 
+    else 
+    	{	
+        if (dy >= 0) 
+        	{
+            x = x0;
+            y = y0;
+            ye = y1;
+        	} 
+        else 
+        	{
+            x = x1;
+            y = y1;
+            ye = y0;
+        	}
+        plot(x, y, mode);
+        
+        for (i = 0; y < ye; i++) 
+        	{
+            y = y + 1;
+            if (py <= 0)
+                py = py + 2 * dx0;
+            else 
+            	{
+                if ((dx < 0 && dy < 0) || (dx > 0 && dy > 0)) 
+                    x = x + 1;
+                else 
+                    x = x - 1;
+                py = py + 2 * (dx0 - dy0);
+            	}
+            plot(x, y, mode);
+        	}
+    	}
+	}
+
+
+/******************************************************************************\
+|* Draw a rect to the framebuffer
+\******************************************************************************/
+void Display::rect(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,
+                   WriteMode mode) 
+	{
+    line(x0, y0, x1, y0, mode);
+    line(x0, y1, x1, y1, mode);
+    line(x0, y0, x0, y1, mode);
+    line(x1, y0, x1, y1, mode);
+	}
+
+/******************************************************************************\
+|* Draw a rect to the framebuffer
+\******************************************************************************/
+void Display::fill(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,
+                   WriteMode mode) 
+	{
+    for (uint8_t x = x0; x <= x1; x++) 
+        for (uint8_t y = y0; y <= y1; y++) 
+            plot(x, y, mode);
+	}
+
+/******************************************************************************\
+|* Draw a character on the screen at a position
+\******************************************************************************/
+void Display::glyph(const uint8_t *font, char c, uint8_t ax, uint8_t ay,
+                    WriteMode mode, Rotation rotation) 
+    {
+    if ( (font != nullptr) && (c >= 32) && (c <=126))
+    	{
+        uint8_t fontW 	= font[0];
+        uint8_t fontH 	= font[1];
+
+        uint16_t seek 	= (c - 32) * (fontW * fontH) / 8 + 2;
+
+        uint8_t b_seek = 0;
+
+        for (uint8_t x = 0; x < fontW; x++) 
+            for (uint8_t y = 0; y < fontH; y++) 
+            	{
+                if (font[seek] >> b_seek & 0b00000001) 
+                    switch (rotation) 
+                    	{
+                        case Rotation::deg0:
+                            plot(x + ax, y + ay, mode);
+                            break;
+                        case Rotation::deg90:
+                            plot(-y + ax + fontH, x + ay, mode);
+                            break;
+                    	}
+                	
+                b_seek++;
+                if (b_seek == 8) 
+                	{
+                    b_seek = 0;
+                    seek++;
+                	}
+            	}
+    	}
+	}
+
+/******************************************************************************\
+|* Draw a string on the screen at a position
+\******************************************************************************/
+void Display::text(const uint8_t* font, const uint8_t *text, 
+				   uint8_t x, uint8_t y, 
+				   WriteMode mode, Rotation rotation) 
+	{
+    if ( (font != nullptr) && (text != nullptr))
+		{
+        uint8_t fontW = font[0];
+
+        uint16_t n 		= 0;
+        uint16_t delta	= 0;
+        
+        while (text[n] != '\0') 
+        	{
+            switch (rotation) 
+            	{
+                case Rotation::deg0:
+                    glyph(font, text[n], x + delta, y, mode, rotation);
+                    break;
+                
+                case Rotation::deg90:
+                    glyph(font, text[n], x, y + delta, mode, rotation);
+                    break;
+            	}
+            	
+			delta += fontW;
+            n++;
+        	}
+        }
+    }
 
 /******************************************************************************\
 |* Invert the display

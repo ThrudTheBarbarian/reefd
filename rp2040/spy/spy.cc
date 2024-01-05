@@ -32,7 +32,7 @@ int main()
    
    	for (int x=0; x<10; x++)	
 	    for (int i=0; i<5; i++)
-    		dpy.setPixel(x+i,x*5+i);
+    		dpy.plot(x+i,x*5+i);
     	
     // Send buffer to the display
     dpy.update();

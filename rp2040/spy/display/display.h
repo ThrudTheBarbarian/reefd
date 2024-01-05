@@ -5,9 +5,16 @@
 #include <cstdint>
 #include "hardware/i2c.h"
 
-///
-/// For 128x32 displays it's still 1024 due to how memory mapping works on ssd1306.
+// For 128x32 displays it's still 1024 due to how memory mapping works on ssd1306.
 #define FRAMEBUFFER_SIZE 1024
+
+
+// Include the 4 system fonts (different sizes)
+#define  SSD1306_ASCII_FULL
+#include "5x8_font.h"
+#include "8x8_font.h"
+#include "12x16_font.h"
+#include "16x32_font.h"
 
 class Display
 	{
@@ -25,9 +32,15 @@ class Display
     	enum class WriteMode : const uint8_t 
     		{
        	 	ADD 		= 0,			// sets pixel on
-        	SUBTRACT 	= 1,			// sets pixel off
-      	  	INVERT 		= 2,			// inverts pixel
+        	SUBTRACT,					// sets pixel off
+      	  	INVERT,						// inverts pixel
 			};
+
+    	enum class Rotation
+    		{
+	        deg0		= 0,			// deg0 - means no rotation      
+       	 	deg90,						// deg90 - means 90 deg rotation
+    		};
 	
 	/**************************************************************************\
 	|* Properties
@@ -76,13 +89,45 @@ class Display
 		/**********************************************************************\
 		|* Set a pixel in the framebuffer
 		\**********************************************************************/
-		void setPixel(int16_t x, int16_t y, WriteMode mode = WriteMode::ADD);
+		void plot(int16_t x, int16_t y, WriteMode mode = WriteMode::ADD);
 
 		/**********************************************************************\
 		|* Draw an image into the framebuffer
 		\**********************************************************************/
-        void draw(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t *image,
+        void blit(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t *image,
                             WriteMode mode = WriteMode::ADD);
+
+		/**********************************************************************\
+		|* Draw a line into the framebuffer
+		\**********************************************************************/
+        void line(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,
+                            WriteMode mode = WriteMode::ADD);
+                            
+		/**********************************************************************\
+		|* Draw a rect into the framebuffer
+		\**********************************************************************/
+        void rect(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,
+                            WriteMode mode = WriteMode::ADD);
+                            
+		/**********************************************************************\
+		|* Fill a rect into the framebuffer
+		\**********************************************************************/
+        void fill(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,
+                            WriteMode mode = WriteMode::ADD);
+                            
+		/**********************************************************************\
+		|* Draw a character on the screen at a position
+		\**********************************************************************/
+		void glyph(const uint8_t* font, char c, uint8_t x, uint8_t y, 
+				   WriteMode mode = WriteMode::ADD, 
+				   Rotation rotation = Rotation::deg0);
+                            
+		/**********************************************************************\
+		|* Draw a character on the screen at a position
+		\**********************************************************************/
+		void text(const uint8_t* font, const uint8_t *txt, uint8_t x, uint8_t y, 
+				   WriteMode mode = WriteMode::ADD, 
+				   Rotation rotation = Rotation::deg0);
 
 		/**********************************************************************\
 		|* Set the buffer - ensure it's 1K long
