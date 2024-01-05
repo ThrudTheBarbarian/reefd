@@ -1,0 +1,15 @@
+add_executable(spy
+        spy.cc
+        display/display.cc
+        )
+
+# pull in common dependencies
+target_link_libraries(spy 
+        hardware_i2c
+		pico_stdlib)
+
+# create map/bin/hex file etc.
+pico_add_extra_outputs(spy)
+
+# add url via pico_set_program_url
+example_auto_set_url(spy)
