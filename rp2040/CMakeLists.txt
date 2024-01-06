@@ -19,7 +19,12 @@ set(PICO_EXAMPLES_PATH ${PROJECT_SOURCE_DIR})
 pico_sdk_init()
 
 # include the generic C++ headers
-include_directories(../include)
+include_directories(../include 
+					spy/can
+					$ENV{PICO_SDK_PATH}/src/rp2_common/cmsis/stub/CMSIS/Device/RaspberryPi/RP2040/Include
+					$ENV{PICO_SDK_PATH}/src/rp2_common/cmsis/stub/CMSIS/Core/Include
+					$ENV{PICO_SDK_PATH}/src/rp2_common/hardware_irq/include/hardware
+					)
 
 include(example_auto_set_url.cmake)
 # Add blink example

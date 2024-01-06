@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "display.h"
 
 /******************************************************************************\
@@ -140,6 +141,23 @@ void Display::clear(void)
     memset(_fb, 0, FRAMEBUFFER_SIZE);
 	}
 
+/******************************************************************************\
+|* Dump the framebuffer to stdout
+\******************************************************************************/
+void Display::dump(void)
+	{
+	printf("update!\n");
+	uint8_t *dt = _fb;
+	for(int i=0; i<64; i++)
+		{
+		for (int j=0; j<16; j++)
+			printf("%02x ", *dt++);
+		printf("\n");
+		}
+	printf("\n");
+	fflush(stdout);
+	}
+	
 /******************************************************************************\
 |* Set the orientation of the display by remapping the cols and rows
 \******************************************************************************/
@@ -355,7 +373,7 @@ void Display::glyph(const uint8_t *font, char c, uint8_t ax, uint8_t ay,
 /******************************************************************************\
 |* Draw a string on the screen at a position
 \******************************************************************************/
-void Display::text(const uint8_t* font, const uint8_t *text, 
+void Display::text(const uint8_t* font, const char *text, 
 				   uint8_t x, uint8_t y, 
 				   WriteMode mode, Rotation rotation) 
 	{
@@ -441,7 +459,7 @@ void Display::_cmd(uint8_t cmd)
 \******************************************************************************/
 void Display::_byteOR(int n, uint8_t byte) 
 	{
-    if ((n > 0) && n < (FRAMEBUFFER_SIZE))
+    if ((n >= 0) && n < (FRAMEBUFFER_SIZE))
 	    _fb[n] |= byte;
 	}
 
@@ -450,7 +468,7 @@ void Display::_byteOR(int n, uint8_t byte)
 \******************************************************************************/
 void Display::_byteAND(int n, uint8_t byte) 
 	{
-    if ((n > 0) && n < (FRAMEBUFFER_SIZE))
+    if ((n >= 0) && n < (FRAMEBUFFER_SIZE))
 	    _fb[n] &= byte;
 	}
 
@@ -459,6 +477,6 @@ void Display::_byteAND(int n, uint8_t byte)
 \******************************************************************************/
 void Display::_byteXOR(int n, uint8_t byte) 
 	{
-    if ((n > 0) && n < (FRAMEBUFFER_SIZE))
+    if ((n >= 0) && n < (FRAMEBUFFER_SIZE))
 	    _fb[n] ^= byte;
 	}

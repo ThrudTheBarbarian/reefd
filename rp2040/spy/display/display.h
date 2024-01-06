@@ -5,6 +5,8 @@
 #include <cstdint>
 #include "hardware/i2c.h"
 
+#include "properties.h"
+
 // For 128x32 displays it's still 1024 due to how memory mapping works on ssd1306.
 #define FRAMEBUFFER_SIZE 1024
 
@@ -45,7 +47,7 @@ class Display
 	/**************************************************************************\
 	|* Properties
 	\**************************************************************************/
-
+	GET(uint8_t *, fb);
 	
 	private:
 		/**********************************************************************\
@@ -55,7 +57,7 @@ class Display
 		uint16_t		_address;		// The I2C address
 		
 		Size			_size;			// Display width and height
-		uint8_t *		_fb;			// Framebuffer
+		//uint8_t *		_fb;			// Framebuffer
 		uint8_t 		_width;			// Framebuffer width
 		uint8_t			_height;		// Framebuffer height
 		bool			_inverted;		// Whether inverted
@@ -125,7 +127,7 @@ class Display
 		/**********************************************************************\
 		|* Draw a character on the screen at a position
 		\**********************************************************************/
-		void text(const uint8_t* font, const uint8_t *txt, uint8_t x, uint8_t y, 
+		void text(const uint8_t* font, const char *txt, uint8_t x, uint8_t y, 
 				   WriteMode mode = WriteMode::ADD, 
 				   Rotation rotation = Rotation::deg0);
 
@@ -133,6 +135,11 @@ class Display
 		|* Set the buffer - ensure it's 1K long
 		\**********************************************************************/
         void setBuffer(uint8_t *buffer);
+
+		/**********************************************************************\
+		|* Set the buffer - ensure it's 1K long
+		\**********************************************************************/
+        void dump(void);
 
 		/**********************************************************************\
 		|* Flip the display if required
