@@ -29,6 +29,35 @@ Desktop::Desktop(QObject *parent)
 
 
 
+#pragma mark - Private methods
+
+/******************************************************************************\
+|* Private method: return all plugins of a given type
+\******************************************************************************/
+void Desktop::_findPlugins(QJsonObject& records, QString filter, QString type)
+	{
+	QStringList filters;
+	filters << filter ;
+	QDir dir(_fmwkDir);
+	QStringList list = dir.entryList(filters);
+
+	QJsonArray items;
+	for (QString& itemName : list)
+		{
+		QStringList parts = itemName.split(".");
+		if (parts.length() > 0)
+			{
+			QJsonObject item;
+			item.insert("name", parts.at(0));
+			item.insert("notify", parts.at(0) + type);
+			items.append(item);
+			}
+		}
+	records.insert("plugins", items);
+	}
+
+
+
 #pragma mark - slots
 
 /******************************************************************************\
@@ -38,30 +67,15 @@ void Desktop::fetchDesktopIcons(QString user, QString identifier)
 	{
 	(void)user;
 
-	QStringList filters;
-	filters << "*.png" ;
-	QDir dir(_rsrcDir + ICONS_PATH);
-	QStringList iconList = dir.entryList(filters);
-
+	/**************************************************************************\
+	|* Fetch all the ".icon" plugins
+	\**************************************************************************/
 	QJsonObject records;
-	QJsonArray icons;
-	for (QString& iconName : iconList)
-		{
-		QStringList parts = iconName.split(".");
-		if (parts.length() > 0)
-			{
-			QJsonObject icon;
-			icon.insert("name", parts.at(0));
-			icon.insert("path", QString("/") + ICONS_PATH + iconName);
-			icon.insert("notify", parts.at(0) + "Icon");
-			icons.append(icon);
-			}
-		}
+	_findPlugins(records, "*.icon", "Icon");
 
 	/**************************************************************************\
 	|* Create the JSON record and send to the client who called us
 	\**************************************************************************/
-	records.insert("icons", icons);
 	records.insert("method", "DesktopIcons");
 
 	QJsonDocument result(records);
@@ -75,25 +89,15 @@ void Desktop::fetchDesktopApps(QString user, QString identifier)
 	{
 	(void)user;
 
-	QStringList filters;
-	filters << "*.app" ;
-	QDir dir(_fmwkDir);
-	QStringList appsList = dir.entryList(filters);
-
+	/**************************************************************************\
+	|* Fetch all the ".app" plugins
+	\**************************************************************************/
 	QJsonObject records;
-	QJsonArray apps;
-	for (QString& appName : appsList)
-		{
-		QJsonObject app;
-		app.insert("name", appName);
-		app.insert("notify", appName + "App");
-		apps.append(app);
-		}
+	_findPlugins(records, "*.app", "App");
 
 	/**************************************************************************\
 	|* Create the JSON record and send to the client who called us
 	\**************************************************************************/
-	records.insert("apps", apps);
 	records.insert("method", "DesktopApps");
 
 	QJsonDocument result(records);

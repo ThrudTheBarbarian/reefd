@@ -137,7 +137,7 @@ void Socket::socketDisconnected(void)
 void Socket::sendText(const QString &message, QString identifier)
 	{
 	if (identifier.length() == 0)
-		for (QWebSocket *endpoint : qAsConst(_clients))
+		for (QWebSocket *endpoint : std::as_const(_clients))
 			endpoint->sendTextMessage(message);
 	else
 		{
@@ -155,7 +155,7 @@ void Socket::sendText(const QString &message, QString identifier)
 void Socket::sendData(const QByteArray &data, QString identifier)
 	{
 	if (identifier.length() == 0)
-		for (QWebSocket *endpoint : qAsConst(_clients))
+		for (QWebSocket *endpoint : std::as_const(_clients))
 			endpoint->sendBinaryMessage(data);
 	else
 		{

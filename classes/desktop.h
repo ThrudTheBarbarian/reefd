@@ -15,6 +15,12 @@ class Desktop : public QObject
 	GET(QString, rsrcDir);				// Location of resources
 	GET(QString, fmwkDir);				// Location of frameworks
 
+	private:
+		/**********************************************************************\
+		|* Method: find all plugins of a given type
+		\**********************************************************************/
+		void _findPlugins(QJsonObject& records, QString filter, QString type);
+
 	public:
 		/**********************************************************************\
 		|* Constructor / Destructor
